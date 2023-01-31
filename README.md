@@ -44,10 +44,16 @@ python detect.py --weights yolov7.pt --conf 0.25 --img-size 640 --source yourvid
 ### GradCAM on Yolov7 
 On image:
 ``` shell
-python main_gradcam.py --weights weights/yolov7.pt --conf 0.75 --img-size 640 --img-path inference/images/horses.jpg --method gradcam --target-layers 104_act
+python main_gradcam.py --model-path weights/yolov7.pt --conf 0.75 --img-size 640 --img-path inference/images/horses.jpg --method gradcam --target-layers 104_act
 ```
 
-On video: TODO
+Note: Saliency maps will be saved to outputs/horses/<method> for each class detected.
+
+On video: 
+``` shell
+TODO
+```
+
 
 ### Acknowledgements
 
