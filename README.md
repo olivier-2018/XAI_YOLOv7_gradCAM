@@ -15,6 +15,12 @@ git clone git@github.com:olivier-2018/XAI_YOLOv7_gradCAM.git
 # then
 cd XAI_YOLOv7_gradCAM 
 ```
+- Download yolov7 pre-trained weights 
+```sh
+mkdir weights
+cd weights 
+wget https://github.com/WongKinYiu/yolov7/releases/download/v0.1/yolov7.pt
+```
 - Create a poetry virtual environment within the repository:
 ```sh
 poetry install
@@ -38,7 +44,7 @@ python detect.py --weights yolov7.pt --conf 0.25 --img-size 640 --source yourvid
 ### GradCAM on Yolov7 
 On image:
 ``` shell
-python main_gradcam.py --weights yolov7.pt --conf 0.75 --img-size 640 --img-path inference/images/horses.jpg --method gradcam --target-layers 104_act
+python main_gradcam.py --weights weights/yolov7.pt --conf 0.75 --img-size 640 --img-path inference/images/horses.jpg --method gradcam --target-layers 104_act
 ```
 
 On video: TODO
