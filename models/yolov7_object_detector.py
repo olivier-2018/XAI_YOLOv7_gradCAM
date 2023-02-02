@@ -177,9 +177,9 @@ class YOLOV7TorchObjectDetector(nn.Module):
 
 
 if __name__ == '__main__':
-    model_path = '../weights/yolov7_100e_64b_pre.pt'    
+    model_path = 'weights/yolov7_100e_64b_pre.pt'    
     print("[INFO] model read: ",model_path)
-    img_path = '../data/odsrihs/000006.jpg' 
+    img_path = 'inference/images/000006.jpg' 
     print("[INFO] image read: ",img_path)
     model = YOLOV7TorchObjectDetector(model_path, 'cpu', img_size=(640, 640)).to('cpu')
     print("[INFO] object instantiated")
