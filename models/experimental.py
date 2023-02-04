@@ -81,9 +81,11 @@ class Ensemble(nn.ModuleList):
         return y, None  # inference, train output
 
 
+
+
+
 class ORT_NMS(torch.autograd.Function):
     '''ONNX-Runtime NMS operation'''
-
     @staticmethod
     def forward(ctx,
                 boxes,
@@ -108,7 +110,6 @@ class ORT_NMS(torch.autograd.Function):
 
 class TRT_NMS(torch.autograd.Function):
     '''TensorRT NMS operation'''
-
     @staticmethod
     def forward(
             ctx,
@@ -157,14 +158,13 @@ class TRT_NMS(torch.autograd.Function):
 
 class ONNX_ORT(nn.Module):
     '''onnx module with ONNX-Runtime NMS operation.'''
-
     def __init__(self, max_obj=100, iou_thres=0.45, score_thres=0.25, max_wh=640, device=None):
         super().__init__()
         self.device = device if device else torch.device("cpu")
         self.max_obj = torch.tensor([max_obj]).to(device)
         self.iou_threshold = torch.tensor([iou_thres]).to(device)
         self.score_threshold = torch.tensor([score_thres]).to(device)
-        self.max_wh = max_wh  # if max_wh != 0 : non-agnostic else : agnostic
+        self.max_wh = max_wh # if max_wh != 0 : non-agnostic else : agnostic
         self.convert_matrix = torch.tensor([[1, 0, 1, 0], [0, 1, 0, 1], [-0.5, 0, 0.5, 0], [0, -0.5, 0, 0.5]],
                                            dtype=torch.float32,
                                            device=self.device)
@@ -187,11 +187,9 @@ class ONNX_ORT(nn.Module):
         X = X.unsqueeze(1).float()
         return torch.cat([X, selected_boxes, selected_categories, selected_scores], 1)
 
-
 class ONNX_TRT(nn.Module):
     '''onnx module with TensorRT NMS operation.'''
-
-    def __init__(self, max_obj=100, iou_thres=0.45, score_thres=0.25, max_wh=None, device=None):
+    def __init__(self, max_obj=100, iou_thres=0.45, score_thres=0.25, max_wh=None,device=None):
         super().__init__()
         assert max_wh is None
         self.device = device if device else torch.device('cpu')
@@ -218,7 +216,6 @@ class ONNX_TRT(nn.Module):
 
 class End2End(nn.Module):
     '''export onnx or tensorrt model with NMS operation.'''
-
     def __init__(self, model, max_obj=100, iou_thres=0.45, score_thres=0.25, max_wh=None, device=None):
         super().__init__()
         device = device if device else torch.device('cpu')
