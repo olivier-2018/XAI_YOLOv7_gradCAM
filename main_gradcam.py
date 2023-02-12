@@ -19,9 +19,9 @@ parser.add_argument('--img-path', type=str, default='figure/cam', help='input im
 parser.add_argument('--img-size', type=int, default=640, help="input image size")
 parser.add_argument('--output-dir', type=str, default='outputs/', help='output dir')
 parser.add_argument('--no_text_box', action='store_true', help='do not show label and box on the heatmap')
-parser.add_argument('--display1', action='store_true', help='display heatmaps with OpenCV instead of saving pictures')
-parser.add_argument('--display2', action='store_true', help='display heatmaps with Pillow (best with notebook) instead of saving pictures')
-parser.add_argument('--display-scale', type=float, default=1, help='scale heatmap image with given ratio')
+parser.add_argument('--display', action='store_true', help='display heatmaps with OpenCV instead of saving pictures')
+parser.add_argument('--display-scale', type=float, default=1, help='only valid with display flag. scale heatmap display with given ratio')
+parser.add_argument('--save', action='store_true', help='saves heatmaps')
 
 parser.add_argument('--target-layers', type=str, default='104_act',
                     help='The layer hierarchical address to which gradcam will be applied.'
@@ -29,10 +29,9 @@ parser.add_argument('--target-layers', type=str, default='104_act',
 parser.add_argument('--method', type=str, default='gradcam', choices=['gradcam', 'gradcampp'], help='gradcam method. Default is gradcam')
 parser.add_argument('--target-class', type=str, default='dog', help='class to be analyzed')
 
-
 parser.add_argument('--device', type=str, default='cpu', help='cuda or cpu')
 parser.add_argument('--names', type=str, default=None, 
-                    help='Names of classes (list of strings). Defaults is None (coco dataset classes read directly from model). '
+                    help='Names of classes (list of strings). Defaults is None (Optional forcoco dataset as classes are detected directly from model). '
                         'For custom models, names should be a list of strings')
 
 args = parser.parse_args()
@@ -87,6 +86,7 @@ def main(img_path):
     # read image
     print('[INFO] Loading the image')
     img = cv2.imread(img_path)  # Read image format: BGR
+    image_name = os.path.basename(img_path) 
     
     # Resize
     old_img_size = img.shape
@@ -139,22 +139,28 @@ def main(img_path):
         # result = result[..., ::-1]  # convert to bgr
         
         # Save Settings
-        image_name = os.path.basename(img_path) 
-        save_path = f'{args.output_dir}{image_name[:-4]}/{args.method}'
-        if not os.path.exists(save_path):
-            os.makedirs(save_path)
-        print(f'[INFO] Saving the final image at {save_path}')
+        if args.save:
+            save_path = f'{args.output_dir}{image_name[:-4]}/{args.method}'
+            if not os.path.exists(save_path):
+                os.makedirs(save_path)
+            print(f'[INFO] Saving the final image at {save_path}')
         
-
         # Iterate through each detected class in the image
         res_img = result.copy()
         
         # Iterate through each detected class in each image
         for i, mask in enumerate(masks):
+
+            # Normalize saliency map
+            saliency_map_min, saliency_map_max = mask.min(), mask.max()
+            mask = (mask - saliency_map_min).div(saliency_map_max - saliency_map_min).data
         
+            # Round max saliency
+            max_saliency = str(saliency_map_max.detach().numpy().round(4))
+            
             # Get the location and category information of the detected class
             bbox, cls_name = boxes[0][i], class_names[0][i]
-            label = f'{cls_name} {conf[0][i]}'  # category + confidence score
+            label = f'{cls_name} {conf[0][i]} ({max_saliency})'  # category + confidence score
             
             # plot the bounding boxes
             res_img = plot_one_box(bbox, 
@@ -169,9 +175,9 @@ def main(img_path):
         # Resize to original image size            
         res_img = cv2.resize(res_img, dsize=(img.shape[:-1][::-1]))
         
-        # display or save
+        # display or/and save
         go_next = False
-        if args.display1:
+        if args.display:
             res_img = cv2.resize(res_img, (0,0), fx=args.display_scale, fy=args.display_scale) 
             msg = f'{image_name[:-4]}/{args.method}/class:{args.target_class}/layer:{target_layer}'
             cv2.imshow(msg, res_img)
@@ -182,17 +188,12 @@ def main(img_path):
                 elif key == 32: # if "space" pressed
                     go_next = True
                 
-        elif args.display2: # TOFIX: NOT WORKING
-            res_img = cv2.resize(res_img, (0,0), fx=args.display_scale, fy=args.display_scale) 
-            # pil_img =  PIL.Image.fromarray(np.uint8(res_img*255))
-            pil_img = PIL.Image.fromarray(res_img.astype('uint8'), 'RGB')
-            pil_img.show()
-        else:
+        if args.save:
             output_path = f'{save_path}/{target_layer[:-4]}_{i}.jpg'
             cv2.imwrite(output_path, res_img)
             print(f'{image_name[:-4]}_{target_layer[:-4]}_{i}.jpg done!!')
     
-    if args.display1:
+    if args.display:
             cv2.destroyAllWindows()     
             
     print(f'Total time : {round(time.time() - tic, 4)} s')
