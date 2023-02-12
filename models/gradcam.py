@@ -14,7 +14,7 @@ def find_yolo_layer(model, layer_name):
     Return:
         target_layer: found layer
     """
-    hierarchy = layer_name.split('_')
+    hierarchy = layer_name.split('_', 1)
     target_layer = model.model.model._modules[hierarchy[0]]
 
     for h in hierarchy[1:]:
