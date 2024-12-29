@@ -1,6 +1,8 @@
 # GradCAM on Yolov7
+Original Yolo_v7 release by WongKinYiu. 
+Ref: https://github.com/WongKinYiu/yolov7.git
 
-### Getting started:
+## Getting started:
 - Install poetry (manages dependances for pip):
 ```sh
 curl -sSL https://install.python-poetry.org | python3 -
@@ -42,22 +44,26 @@ python detect.py --weights yolov7.pt --conf 0.25 --img-size 640 --source yourvid
 ```
 
 ### GradCAM on Yolov7 
-On image:
+On images:
 ``` shell
 python main_gradcam.py --model-path weights/yolov7.pt --conf 0.75 --img-size 640 --img-path inference/images/horses.jpg --method gradcam --target-layers 104_act
 ```
 
-Note: Saliency maps will be saved to outputs/horses/<method> for each class detected.
+**Notes:** 
+- See main_gradcam.py for detailed running options (also in illustrations below)
+- Saliency maps will be saved to outputs/horses/<method> for each class detected.
 
 On video: 
 ``` shell
 TODO
 ```
 
+## Project presentation
 
-### Acknowledgements
+![Alt Text](figure/XAI_Yolov7_GradCam_highRes.gif)
+
+## Acknowledgements
 
 * [https://github.com/WongKinYiu/yolov7](https://github.com/WongKinYiu/yolov7)
 * [https://github.com/pooya-mohammadi/yolov5-gradcam](https://github.com/pooya-mohammadi/yolov5-gradcam)
 * [https://github.com/jacobgil/pytorch-grad-cam](https://github.com/jacobgil/pytorch-grad-cam)
-
